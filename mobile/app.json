@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "WaselX",
+    "slug": "waselx",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#142F48"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.waselx.logistics",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "WaselX uses your location to show nearby shipments and track deliveries.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "WaselX uses your background location for real-time shipment tracking."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#142F48"
+      },
+      "package": "com.waselx.logistics",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-location",
+      "expo-image-picker",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#142F48"
+        }
+      ]
+    ],
+    "extra": {
+      "apiBaseUrl": "http://localhost:3000/api",
+      "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+    }
+  }
+}

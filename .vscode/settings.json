@@ -1,0 +1,29 @@
+{
+  "java.project.sourcePaths": [],
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.expo": true
+  },
+  "[groovy]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "java.project.referencedLibraries": [],
+  "java.import.exclusions": [
+    "**/node_modules/**",
+    "**/android/**",
+    "**/.gradle/**",
+    "**/build/**"
+  ],
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/android/build": true,
+    "**/.gradle": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/android/.gradle/**": true,
+    "**/android/build/**": true
+  },
+  "gradle.nestedProjects": false,
+  "java.configuration.updateBuildConfiguration": "disabled"
+}
