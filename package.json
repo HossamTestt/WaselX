@@ -1,0 +1,15 @@
+{
+  "name": "waselx",
+  "version": "1.0.0",
+  "description": "WaselX Logistics Platform",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:admin": "npm run dev --prefix admin",
+    "dev:mobile": "npm run start --prefix mobile",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:admin\"",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:admin\" \"npm run dev:mobile\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

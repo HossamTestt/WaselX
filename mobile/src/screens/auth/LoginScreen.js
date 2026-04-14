@@ -1,11 +1,7 @@
-/**
- * WaselX — Premium Login Screen
- * Glassmorphism card · Pulse logo · First-login welcome modal
- */
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, KeyboardAvoidingView, Platform,
-  Alert, Animated, StatusBar, ImageBackground, TouchableOpacity, Pressable
+  Animated, StatusBar, ImageBackground, TouchableOpacity, Pressable, Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,8 +9,19 @@ import { Button, Input } from '../../components';
 import { Colors, Typography, Spacing, BorderRadius } from '../../theme';
 import useAuthStore from '../../store/authStore';
 import WelcomeModal from '../shared/WelcomeModal';
+import { t } from '../../i18n';
 
 const BG = 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2070&auto=format&fit=crop';
+
+// Web-safe alert
+const showAlert = (title, message) => {
+  if (Platform.OS === 'web') {
+    window.alert(`${title}\n\n${message}`);
+  } else {
+    const { Alert } = require('react-native');
+    Alert.alert(title, message);
+  }
+};
 
 export default function LoginScreen({ navigation }) {
   const login = useAuthStore((s) => s.login);
@@ -24,6 +31,7 @@ export default function LoginScreen({ navigation }) {
   const [showWelcome, setShowWelcome] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState('');
 
   // Animations
   const pulseAnim  = useRef(new Animated.Value(1)).current;
@@ -32,13 +40,11 @@ export default function LoginScreen({ navigation }) {
   const slideAnim  = useRef(new Animated.Value(40)).current;
 
   useEffect(() => {
-    // Entrance animation
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
       Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 10, useNativeDriver: true }),
     ]).start();
 
-    // Continuous logo pulse
     Animated.loop(
       Animated.sequence([
         Animated.parallel([
@@ -54,15 +60,14 @@ export default function LoginScreen({ navigation }) {
   }, []);
 
   const handleLogin = async () => {
+    setError('');
     if (!email.trim() || !password) {
-      Alert.alert('Missing Fields', 'Please enter your email and password.');
+      setError('يرجى إدخال البريد الإلكتروني وكلمة المرور.');
       return;
     }
     setLoading(true);
     try {
       const user = await login(email.trim().toLowerCase(), password);
-
-      // Check if first login
       const key = `waselx_welcomed_${user?.id || email}`;
       const welcomed = await AsyncStorage.getItem(key);
       if (!welcomed) {
@@ -71,7 +76,7 @@ export default function LoginScreen({ navigation }) {
         setShowWelcome(true);
       }
     } catch (e) {
-      Alert.alert('Login Failed', e.response?.data?.message || 'Invalid email or password. Please try again.');
+      setError(e.response?.data?.message || 'خطأ في البريد الإلكتروني أو كلمة المرور.');
     } finally {
       setLoading(false);
     }
@@ -93,21 +98,21 @@ export default function LoginScreen({ navigation }) {
 
               {/* ── Logo ── */}
               <View style={styles.logoArea}>
-                {/* Glow halo */}
-                <Animated.View style={[styles.glow, { opacity: glowAnim }]} />
-                <Animated.Image
-                  source={require('../../../assets/logo.png')}
-                  style={[styles.logo, { transform: [{ scale: pulseAnim }] }]}
-                  resizeMode="contain"
-                />
-                <Text style={styles.tagline}>Logistics at your fingertips</Text>
+                <Animated.View style={[styles.logoBackground, { transform: [{ scale: pulseAnim }] }]}>
+                  <Image
+                    source={require('../../../assets/logo_horizontal.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
+                </Animated.View>
+                <Text style={styles.tagline}>الخدمات اللوجستية بين يديك</Text>
               </View>
 
               {/* ── Form ── */}
               <View style={styles.form}>
                 <Input
-                  label="Email Address"
-                  placeholder="you@company.com"
+                  label={t('email')}
+                  placeholder="name@company.ae"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -117,7 +122,7 @@ export default function LoginScreen({ navigation }) {
                   style={styles.inputWrap}
                 />
                 <Input
-                  label="Password"
+                  label={t('password')}
                   placeholder="••••••••••"
                   secureTextEntry={!showPass}
                   value={password}
@@ -126,12 +131,18 @@ export default function LoginScreen({ navigation }) {
                   style={styles.inputWrap}
                 />
 
-                <TouchableOpacity style={styles.forgotRow} onPress={() => Alert.alert('Reset Password', 'Please contact support@waselx.com to reset your password.')}>
-                  <Text style={styles.forgotText}>Forgot password?</Text>
+                <TouchableOpacity style={styles.forgotRow} onPress={() => showAlert('إعادة تعيين كلمة المرور', 'يرجى التواصل مع الدعم الفني support@waselx.com لإعادة تعيين كلمة مرورك.')}>
+                  <Text style={styles.forgotText}>نسيت كلمة المرور؟</Text>
                 </TouchableOpacity>
 
+                {!!error && (
+                  <View style={styles.errorBox}>
+                    <Text style={styles.errorText}>⚠️ {error}</Text>
+                  </View>
+                )}
+
                 <Button
-                  title="Sign In"
+                  title={t('login')}
                   onPress={handleLogin}
                   loading={loading}
                   style={styles.btnSignIn}
@@ -140,26 +151,26 @@ export default function LoginScreen({ navigation }) {
                 {/* Divider */}
                 <View style={styles.divider}>
                   <View style={styles.divLine} />
-                  <Text style={styles.divText}>OR</Text>
+                  <Text style={styles.divText}>أو</Text>
                   <View style={styles.divLine} />
                 </View>
 
                 {/* UAE PASS */}
                 <TouchableOpacity
                   style={styles.btnUAE}
-                  onPress={() => Alert.alert('UAE PASS', 'UAE PASS SSO is coming soon in the next release.')}
+                  onPress={() => showAlert('الهوية الرقمية UAE PASS', 'خدمة تسجيل الدخول بالهوية الرقمية ستتوفر قريباً.')}
                   activeOpacity={0.8}
                 >
                   <Text style={styles.btnUAEIcon}>🇦🇪</Text>
-                  <Text style={styles.btnUAEText}>Sign in with UAE PASS</Text>
+                  <Text style={styles.btnUAEText}>الدخول عبر الـ UAE PASS</Text>
                 </TouchableOpacity>
               </View>
 
               {/* ── Footer ── */}
               <View style={styles.footer}>
-                <Text style={styles.footerText}>New to WaselX? </Text>
+                <Text style={styles.footerText}>جديد على واصل إكس؟ </Text>
                 <Pressable onPress={() => navigation.navigate('Register')}>
-                  <Text style={styles.footerLink}>Create account</Text>
+                  <Text style={styles.footerLink}>إنشاء حساب جديد</Text>
                 </Pressable>
               </View>
 
@@ -202,26 +213,34 @@ const styles = StyleSheet.create({
   },
 
   // Logo
-  logoArea:  { alignItems: 'center', marginBottom: Spacing.xl, position: 'relative' },
-  glow: {
-    position: 'absolute',
-    top: -10,
-    width: 160,
-    height: 80,
-    borderRadius: 80,
-    backgroundColor: Colors.orange,
-    shadowColor: Colors.orange,
-    shadowRadius: 40,
-    shadowOpacity: 1,
-    elevation: 0,
+  logoArea:  { alignItems: 'center', marginBottom: Spacing.xl },
+  logoBackground: { 
+    backgroundColor: 'rgba(255,255,255,0.9)', 
+    paddingHorizontal: 16, 
+    paddingVertical: 10, 
+    borderRadius: 16,
+    shadowColor: '#fff',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
   },
-  logo:    { width: 190, height: 65 },
-  tagline: { marginTop: 8, fontSize: 12, color: 'rgba(255,255,255,0.5)', letterSpacing: 1.2, textTransform: 'uppercase', fontWeight: '600' },
+  logo:    { width: 140, height: 40 },
+  tagline: { marginTop: 6, fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1.4, textTransform: 'uppercase', fontWeight: '600' },
 
   // Inputs
   form:      { width: '100%' },
   inputWrap: { marginBottom: Spacing.sm },
   inputText: { color: Colors.white, borderColor: 'rgba(255,255,255,0.25)', backgroundColor: 'rgba(255,255,255,0.08)' },
+
+  errorBox: {
+    backgroundColor: 'rgba(239,68,68,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.4)',
+    borderRadius: 12,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  errorText: { color: '#ef4444', fontSize: 13, fontWeight: '600' },
 
   forgotRow: { alignItems: 'flex-end', marginBottom: Spacing.md, marginTop: -4 },
   forgotText: { fontSize: 13, color: Colors.orange, fontWeight: '600' },

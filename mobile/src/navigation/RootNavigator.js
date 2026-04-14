@@ -16,6 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import useAuthStore from '../store/authStore';
 import { Colors, Shadows, BorderRadius } from '../theme';
+import * as Notifications from 'expo-notifications';
+import { registerForPushNotificationsAsync, handleNotificationResponse } from '../services/notifications';
 
 // Auth
 import OnboardingScreen from '../screens/auth/OnboardingScreen';
@@ -28,6 +30,7 @@ import CreateShipmentScreen  from '../screens/shipper/CreateShipmentScreen';
 import ShipmentDetailScreen  from '../screens/shipper/ShipmentDetailScreen';
 import TrackingScreen        from '../screens/shipper/TrackingScreen';
 import HistoryScreen         from '../screens/shipper/HistoryScreen';
+import ShipperProfileScreen  from '../screens/shipper/ShipperProfileScreen';
 
 // Carrier
 import CarrierDashboard           from '../screens/carrier/CarrierDashboard';
@@ -38,7 +41,6 @@ import CarrierProfileScreen       from '../screens/carrier/CarrierProfileScreen'
 
 const Stack = createStackNavigator();
 const Tab   = createBottomTabNavigator();
-
 // ─── Premium Floating Tab Bar ──────────────────────────────────────────────────
 function TabBar({ state, descriptors, navigation }) {
   return (
@@ -135,6 +137,11 @@ function ShipperTabs() {
         component={HistoryScreen}
         options={{ tabBarIcon: ({ focused }) => '📋', tabBarLabel: 'History' }}
       />
+      <Tab.Screen
+        name="ShipperProfile"
+        component={ShipperProfileScreen}
+        options={{ tabBarIcon: () => '👤', tabBarLabel: 'Profile' }}
+      />
     </Tab.Navigator>
   );
 }
@@ -217,6 +224,28 @@ export default function RootNavigator() {
       setCheckingOnboarding(false);
     });
   }, []);
+
+  useEffect(() => {
+    let responseListener;
+
+    if (isAuthenticated && user && Platform.OS !== 'web') {
+      // 1. Register for push notifications
+      registerForPushNotificationsAsync();
+
+      // 2. Listen for notification responses (user tapping on notification)
+      responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+        const data = handleNotificationResponse(response);
+        // Deep linking logic can be added here once we have navigation ref
+        console.log('User tapped notification:', data);
+      });
+    }
+
+    return () => {
+      if (responseListener) {
+        Notifications.removeNotificationSubscription(responseListener);
+      }
+    };
+  }, [isAuthenticated, user]);
 
   if (isLoading || checkingOnboarding) return <SplashScreen />;
 

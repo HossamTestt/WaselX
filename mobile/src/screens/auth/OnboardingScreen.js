@@ -1,95 +1,100 @@
 /**
  * WaselX — Premium Onboarding Screen
- * 3-slide animated swiper with spring motion, progress dots and glassmorphism CTA
+ * Web-compatible: uses state-based slide transitions (no horizontal ScrollView paging)
  */
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Dimensions,
-  TouchableOpacity, StatusBar, Animated, Platform
+  View, Text, StyleSheet, Dimensions,
+  TouchableOpacity, StatusBar, Animated, Platform, Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Typography, Spacing, BorderRadius } from '../../theme';
+import { t } from '../../i18n';
 
 const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
     id: 'move',
-    headline: 'Move Cargo,',
-    headlineAccent: 'Not Mountains.',
-    body: 'Post your shipment in 60 seconds and receive competitive bids from verified UAE carriers instantly.',
+    headline: 'انقل شحنتك،',
+    headlineAccent: 'بكل سلاسة.',
+    body: 'انشر طلب شحن في ٦٠ ثانية واستلم عروضاً تنافسية من ناقلينا المعتمدين في الإمارات فوراً.',
     icon: '🚚',
-    bg: ['#0D1F30', '#142F48'],
-    accent: Colors.orange,
+    accentColor: Colors.orange,
+    bgTop: '#0D1F30',
+    bgBottom: '#142F48',
   },
   {
     id: 'track',
-    headline: 'Track Every',
-    headlineAccent: 'Mile. Live.',
-    body: 'Real-time GPS updates, status notifications, and full delivery transparency — right in your pocket.',
+    headline: 'تتبع كل',
+    headlineAccent: 'ميل. مباشرة.',
+    body: 'تحديثات حية لموقع الشحنة، تنبيهات الحالة، وشفافية كاملة في التوصيل — في جيبك تماماً.',
     icon: '📍',
-    bg: ['#0A1628', '#1A3A5C'],
-    accent: '#00C2FF',
+    accentColor: '#00C2FF',
+    bgTop: '#0A1628',
+    bgBottom: '#1A3A5C',
   },
   {
     id: 'trust',
-    headline: 'Verified Carriers.',
-    headlineAccent: 'Safe Deliveries.',
-    body: 'Every carrier on WaselX is UAE PASS certified and background-checked. Your cargo is in trusted hands.',
+    headline: 'ناقلين معتمدين.',
+    headlineAccent: 'توصيل آمن.',
+    body: 'كل ناقل في واصل إكس موثق عبر الهوية الرقمية (UAE PASS). شحنتك في أيدٍ أمينة دائماً.',
     icon: '🛡️',
-    bg: ['#0F1E13', '#1A3A25'],
-    accent: Colors.success,
+    accentColor: '#22C55E',
+    bgTop: '#0F1E13',
+    bgBottom: '#1A3A25',
   },
 ];
 
 export default function OnboardingScreen({ navigation }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useRef(null);
 
-  // Animations
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
-  const iconScale = useRef(new Animated.Value(0.8)).current;
-  const dotWidths = SLIDES.map(() => useRef(new Animated.Value(8)).current);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const iconScale = useRef(new Animated.Value(1)).current;
+  const dotWidths = useRef(SLIDES.map((_, i) => new Animated.Value(i === 0 ? 28 : 8))).current;
 
-  const animateIn = (index) => {
-    fadeAnim.setValue(0);
-    slideAnim.setValue(30);
-    iconScale.setValue(0.8);
+  const animateIn = (nextIndex) => {
+    // Fade out
+    Animated.timing(fadeAnim, { toValue: 0, duration: 180, useNativeDriver: true }).start(() => {
+      setActiveIndex(nextIndex);
 
-    SLIDES.forEach((_, i) => {
-      Animated.timing(dotWidths[i], {
-        toValue: i === index ? 28 : 8,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      // Reset slide position
+      slideAnim.setValue(40);
+      iconScale.setValue(0.75);
+
+      // Update dot widths
+      SLIDES.forEach((_, i) => {
+        Animated.timing(dotWidths[i], {
+          toValue: i === nextIndex ? 28 : 8,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      });
+
+      // Fade + slide in
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 420, useNativeDriver: true }),
+        Animated.spring(slideAnim, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
+        Animated.spring(iconScale, { toValue: 1, tension: 100, friction: 8, useNativeDriver: true }),
+      ]).start();
     });
-
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
-      Animated.spring(iconScale, { toValue: 1, tension: 100, friction: 8, useNativeDriver: true }),
-    ]).start();
   };
 
   useEffect(() => { animateIn(0); }, []);
 
-  const handleScroll = (e) => {
-    const index = Math.round(e.nativeEvent.contentOffset.x / width);
-    if (index !== activeIndex) {
-      setActiveIndex(index);
-      animateIn(index);
-    }
-  };
-
   const goNext = async () => {
     if (activeIndex < SLIDES.length - 1) {
-      scrollRef.current?.scrollTo({ x: (activeIndex + 1) * width, animated: true });
+      animateIn(activeIndex + 1);
     } else {
       await AsyncStorage.setItem('waselx_onboarding_done', 'true');
       navigation.replace('Login');
     }
+  };
+
+  const goBack = () => {
+    if (activeIndex > 0) animateIn(activeIndex - 1);
   };
 
   const skip = async () => {
@@ -100,90 +105,89 @@ export default function OnboardingScreen({ navigation }) {
   const slide = SLIDES[activeIndex];
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: slide.bgBottom }]}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      {/* Background */}
-      <View style={[styles.bg, { backgroundColor: slide.bg[1] }]} />
-
       <SafeAreaView style={styles.safe}>
-        {/* Skip */}
+        {/* Top Bar */}
         <View style={styles.topBar}>
-          <View />
+          {activeIndex > 0 ? (
+            <TouchableOpacity onPress={goBack} style={styles.backBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <Text style={styles.backText}>← رجوع</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 60 }} />
+          )}
           <TouchableOpacity onPress={skip} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>تخطي</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Slides */}
-        <ScrollView
-          ref={scrollRef}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={handleScroll}
-          scrollEventThrottle={16}
-          style={{ flex: 1 }}
-        >
-          {SLIDES.map((s, i) => (
-            <View key={s.id} style={styles.slide}>
-              {/* Icon orb */}
-              <Animated.View style={[
-                styles.orb,
-                { borderColor: s.accent + '40', opacity: activeIndex === i ? fadeAnim : 0 }
-              ]}>
-                <Animated.View style={[
-                  styles.orbInner,
-                  { backgroundColor: s.accent + '20', transform: [{ scale: activeIndex === i ? iconScale : 0.8 }] }
-                ]}>
-                  <Text style={styles.icon}>{s.icon}</Text>
-                </Animated.View>
-              </Animated.View>
+        {/* Logo */}
+        <View style={styles.logoWrap}>
+          <View style={styles.logoBackground}>
+            <Image
+              source={require('../../../assets/logo_horizontal.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+        </View>
 
-              {/* Text */}
-              <Animated.View style={[
-                styles.textBlock,
-                activeIndex === i ? { opacity: fadeAnim, transform: [{ translateY: slideAnim }] } : { opacity: 0 }
-              ]}>
-                <Text style={styles.headline}>{s.headline}</Text>
-                <Text style={[styles.headlineAccent, { color: s.accent }]}>{s.headlineAccent}</Text>
-                <Text style={styles.body}>{s.body}</Text>
-              </Animated.View>
+        {/* Animated Content */}
+        <Animated.View style={[
+          styles.content,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}>
+          {/* Icon Orb */}
+          <Animated.View style={[
+            styles.orb,
+            { borderColor: slide.accentColor + '40', transform: [{ scale: iconScale }] }
+          ]}>
+            <View style={[styles.orbInner, { backgroundColor: slide.accentColor + '22' }]}>
+              <Text style={styles.icon}>{slide.icon}</Text>
             </View>
-          ))}
-        </ScrollView>
+          </Animated.View>
+
+          {/* Text */}
+          <View style={styles.textBlock}>
+            <Text style={styles.headline}>{slide.headline}</Text>
+            <Text style={[styles.headlineAccent, { color: slide.accentColor }]}>{slide.headlineAccent}</Text>
+            <Text style={styles.body}>{slide.body}</Text>
+          </View>
+        </Animated.View>
 
         {/* Footer */}
         <View style={styles.footer}>
-          {/* Progress dots */}
+          {/* Progress Dots */}
           <View style={styles.dots}>
             {SLIDES.map((_, i) => (
-              <Animated.View
-                key={i}
-                style={[
-                  styles.dot,
-                  {
-                    width: dotWidths[i],
-                    backgroundColor: i === activeIndex ? slide.accent : 'rgba(255,255,255,0.25)',
-                  }
-                ]}
-              />
+              <TouchableOpacity key={i} onPress={() => animateIn(i)}>
+                <Animated.View
+                  style={[
+                    styles.dot,
+                    {
+                      width: dotWidths[i],
+                      backgroundColor: i === activeIndex ? slide.accentColor : 'rgba(255,255,255,0.25)',
+                    }
+                  ]}
+                />
+              </TouchableOpacity>
             ))}
           </View>
 
-          {/* CTA */}
+          {/* CTA Button */}
           <TouchableOpacity
-            style={[styles.cta, { backgroundColor: slide.accent }]}
+            style={[styles.cta, { backgroundColor: slide.accentColor }]}
             onPress={goNext}
             activeOpacity={0.85}
           >
             <Text style={styles.ctaText}>
-              {activeIndex === SLIDES.length - 1 ? '🚀  Get Started' : 'Next  →'}
+              {activeIndex === SLIDES.length - 1 ? '🚀  ' + t('getStarted') : 'التالي  ←'}
             </Text>
           </TouchableOpacity>
 
-          {/* Step counter */}
-          <Text style={styles.stepText}>{activeIndex + 1} of {SLIDES.length}</Text>
+          <Text style={styles.stepText}>{activeIndex + 1} من {SLIDES.length}</Text>
         </View>
       </SafeAreaView>
     </View>
@@ -191,8 +195,7 @@ export default function OnboardingScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0D1F30' },
-  bg: { ...StyleSheet.absoluteFillObject },
+  root: { flex: 1 },
   safe: { flex: 1 },
 
   topBar: {
@@ -203,42 +206,49 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
     height: 50,
   },
-  skipText: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.3,
+  backBtn: { paddingHorizontal: 4 },
+  backText: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '600' },
+  skipText: { color: 'rgba(255,255,255,0.45)', fontSize: 14, fontWeight: '600', letterSpacing: 0.3 },
+
+  logoWrap: {
+    alignItems: 'center',
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
+  },
+  logo: {
+    width: 160,
+    height: 60,
   },
 
-  slide: {
-    width,
+  content: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.xl,
-    paddingBottom: 100,
   },
 
   orb: {
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 48,
+    marginBottom: 40,
   },
   orbInner: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
+    width: 148,
+    height: 148,
+    borderRadius: 74,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  icon: { fontSize: 72 },
+  icon: { fontSize: 64 },
 
   textBlock: { alignItems: 'center' },
   headline: {
-    ...Typography.h1,
+    fontSize: 28,
+    fontWeight: '800',
     color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
     lineHeight: 36,
@@ -265,7 +275,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   dots: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  dot: { height: 8, borderRadius: BorderRadius.full },
+  dot: { height: 8, borderRadius: 4 },
 
   cta: {
     width: '100%',

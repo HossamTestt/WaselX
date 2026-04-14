@@ -46,13 +46,13 @@ export function Card({ children, style }) {
 }
 
 // ─── Input ────────────────────────────────────────────────────
-export function Input({ label, error, style, inputStyle, ...props }) {
+export function Input({ label, error, style, inputStyle, dark = false, ...props }) {
   return (
     <View style={[styles.inputGroup, style]}>
-      {label && <Text style={styles.inputLabel}>{label}</Text>}
+      {label && <Text style={[styles.inputLabel, dark && styles.inputLabelDark]}>{label}</Text>}
       <TextInput
-        style={[styles.input, error && styles.inputError, inputStyle]}
-        placeholderTextColor={Colors.textLight}
+        style={[styles.input, dark && styles.inputDark, error && styles.inputError, inputStyle]}
+        placeholderTextColor={dark ? 'rgba(255,255,255,0.3)' : Colors.textLight}
         {...props}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
 
   inputGroup: { marginBottom: Spacing.md },
   inputLabel: { fontSize: 13, fontWeight: '600', color: Colors.text, marginBottom: 6 },
+  inputLabelDark: { color: 'rgba(255,255,255,0.55)' },
   input: {
     height: 50,
     borderWidth: 1.5,
@@ -158,6 +159,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.text,
     backgroundColor: Colors.surface,
+  },
+  inputDark: {
+    borderColor: 'rgba(255,255,255,0.12)',
+    color: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.07)',
   },
   inputError: { borderColor: Colors.error },
   errorText: { fontSize: 12, color: Colors.error, marginTop: 4 },

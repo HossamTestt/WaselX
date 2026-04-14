@@ -4,9 +4,7 @@
     "**/node_modules": true,
     "**/.expo": true
   },
-  "[groovy]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
+
   "java.project.referencedLibraries": [],
   "java.import.exclusions": [
     "**/node_modules/**",
@@ -25,5 +23,9 @@
     "**/android/build/**": true
   },
   "gradle.nestedProjects": false,
-  "java.configuration.updateBuildConfiguration": "disabled"
+  "gradle.autoDetect": "off",
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.server.launchMode": "LightWeight",
+  "groovy.validate": false,
+  "githubActions.validators.checkout": false
 }

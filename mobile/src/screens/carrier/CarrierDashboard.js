@@ -1,11 +1,11 @@
 /**
  * WaselX — Premium Carrier Dashboard
- * Earnings summary · Active job card · Browse CTA · Verification badge
+ * Earnings summary · Active job card · Browse CTA · Verification badge (Arabic)
  */
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, RefreshControl,
-  TouchableOpacity, Animated
+  TouchableOpacity, Animated, Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, StatusBadge, EmptyState } from '../../components';
@@ -47,27 +47,36 @@ export default function CarrierDashboard({ navigation }) {
 
   const verified = user?.verification_status === 'verified';
   const isPending = user?.verification_status === 'pending_review';
-  const firstName = user?.name?.split(' ')[0] || 'Driver';
+  const firstName = user?.name?.split(' ')[0] || 'سائق';
 
   return (
     <View style={styles.root}>
       {/* ── Header ── */}
       <SafeAreaView style={styles.header} edges={['top']}>
+        <View style={styles.headerTop}>
+          <View style={styles.logoBackground}>
+            <Image 
+              source={require('../../../assets/logo_horizontal.png')} 
+              style={styles.logo} 
+              resizeMode="contain" 
+            />
+          </View>
+        </View>
         <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.subtitle}>Ready to haul?</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.subtitle}>هل أنت مستعد للانطلاق؟</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={styles.name}>{firstName}</Text>
               {verified
                 ? <View style={[styles.badge, { borderColor: Colors.success + '60', backgroundColor: Colors.success + '20' }]}>
-                    <Text style={[styles.badgeText, { color: Colors.success }]}>✓ Certified</Text>
+                    <Text style={[styles.badgeText, { color: Colors.success }]}>✓ موثق</Text>
                   </View>
                 : isPending
                 ? <View style={[styles.badge, { borderColor: Colors.warning + '60', backgroundColor: Colors.warning + '20' }]}>
-                    <Text style={[styles.badgeText, { color: Colors.warning }]}>⏳ Pending</Text>
+                    <Text style={[styles.badgeText, { color: Colors.warning }]}>⏳ قيد المراجعة</Text>
                   </View>
                 : <View style={[styles.badge, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.08)' }]}>
-                    <Text style={[styles.badgeText, { color: 'rgba(255,255,255,0.5)' }]}>Not Verified</Text>
+                    <Text style={[styles.badgeText, { color: 'rgba(255,255,255,0.5)' }]}>غير موثق</Text>
                   </View>
               }
             </View>
@@ -81,12 +90,12 @@ export default function CarrierDashboard({ navigation }) {
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statNum}>{stats.completed}</Text>
-            <Text style={styles.statLabel}>Trips Done</Text>
+            <Text style={styles.statLabel}>رحلة مكتملة</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNum}>AED {stats.totalEarned.toLocaleString()}</Text>
-            <Text style={styles.statLabel}>Total Earned</Text>
+            <Text style={styles.statNum}>{stats.totalEarned.toLocaleString()} AED</Text>
+            <Text style={styles.statLabel}>إجمالي الأرباح</Text>
           </View>
         </View>
       </SafeAreaView>
@@ -99,11 +108,11 @@ export default function CarrierDashboard({ navigation }) {
       >
         {/* Browse CTA */}
         <TouchableOpacity style={styles.heroBanner} onPress={() => navigation.navigate('Available')} activeOpacity={0.88}>
-          <View>
-            <Text style={styles.heroTitle}>Browse Open Loads 🔍</Text>
-            <Text style={styles.heroSub}>Find shipments near you and submit your best bid</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.heroTitle}>تصفح الشحنات المتاحة 🔍</Text>
+            <Text style={styles.heroSub}>ابحث عن شحنات قريبة منك وقدم أفضل عرض سعر</Text>
           </View>
-          <View style={styles.heroArrow}><Text style={{ color: Colors.white, fontSize: 20 }}>→</Text></View>
+          <View style={styles.heroArrow}><Text style={{ color: Colors.white, fontSize: 20 }}>←</Text></View>
         </TouchableOpacity>
 
         {/* Verification notice for unverified carriers */}
@@ -111,29 +120,29 @@ export default function CarrierDashboard({ navigation }) {
           <View style={styles.noticeCard}>
             <Text style={styles.noticeIcon}>{isPending ? '⏳' : '⚠️'}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={styles.noticeTitle}>{isPending ? 'Verification Under Review' : 'Get Certified'}</Text>
+              <Text style={styles.noticeTitle}>{isPending ? 'التوثيق قيد المراجعة' : 'وثّق حسابك الآن'}</Text>
               <Text style={styles.noticeBody}>
                 {isPending
-                  ? 'Your documents are being reviewed. You can browse but may not bid until approved.'
-                  : 'Complete UAE PASS or passport verification to unlock full access and earn shipper trust.'}
+                  ? 'يتم الآن مراجعة مستنداتك. يمكنك التصفح ولكن لا يمكنك تقديم عروض حتى يتم قبولك.'
+                  : 'أكمل توثيق الهوية الرقمية (UAE PASS) لفتح جميع ميزات التطبيق وكسب ثقة الشاحنين.'}
               </Text>
             </View>
           </View>
         )}
 
         {/* Active Job */}
-        <Text style={styles.sectionTitle}>Current Job</Text>
+        <Text style={styles.sectionTitle}>الرحلة الحالية</Text>
         {activeJob ? (
           <TouchableOpacity onPress={() => navigation.navigate('ActiveJob')} activeOpacity={0.88}>
             <View style={styles.activeJobCard}>
               <View style={styles.activeJobTop}>
                 <StatusBadge status={activeJob.status} />
-                <Text style={styles.activeJobPrice}>AED {Number(activeJob.final_price).toLocaleString()}</Text>
+                <Text style={styles.activeJobPrice}>{Number(activeJob.final_price).toLocaleString()} AED</Text>
               </View>
               <Text style={styles.activeJobRoute}>
-                {activeJob.pickup_city}  →  {activeJob.dropoff_city}
+                {activeJob.pickup_city}  ←  {activeJob.dropoff_city}
               </Text>
-              <Text style={styles.activeJobLoad}>{activeJob.load_type} · {activeJob.weight_tonnes}t</Text>
+              <Text style={styles.activeJobLoad}>{activeJob.load_type} · {activeJob.weight_tonnes} طن</Text>
 
               {/* Progress bar */}
               {(() => {
@@ -146,11 +155,11 @@ export default function CarrierDashboard({ navigation }) {
                 );
               })()}
 
-              <Text style={styles.manageCta}>Tap to manage & update status →</Text>
+              <Text style={styles.manageCta}>اضغط للتفاصيل وتحديث الحالة ←</Text>
             </View>
           </TouchableOpacity>
         ) : (
-          <EmptyState icon="🛣️" title="No Active Load" message="You aren't hauling anything right now. Go find a load!" />
+          <EmptyState icon="🛣️" title="لا توجد رحلات نشطة" message="لا توجد لديك شحنات قيد التنفيذ حالياً. ابحث عن شحنة جديدة!" />
         )}
 
         <View style={{ height: 100 }} />
@@ -169,9 +178,17 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: Spacing.sm },
-  subtitle: { fontSize: 13, color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: 2 },
-  name: { fontSize: 24, fontWeight: '800', color: Colors.white },
+  headerTop: { alignItems: 'center', paddingTop: Spacing.xs, marginBottom: -Spacing.xs },
+  logoBackground: { 
+    backgroundColor: 'rgba(255,255,255,0.9)', 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    borderRadius: 12,
+  },
+  logo: { width: 100, height: 28 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: Spacing.xs },
+  subtitle: { fontSize: 13, color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: 2, textAlign: 'right' },
+  name: { fontSize: 24, fontWeight: '800', color: Colors.white, textAlign: 'right' },
   logoutBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
 
   badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.full, borderWidth: 1 },
@@ -179,7 +196,7 @@ const styles = StyleSheet.create({
 
   statsRow: { flexDirection: 'row', marginTop: Spacing.md, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: BorderRadius.md, padding: Spacing.sm },
   statItem: { flex: 1, alignItems: 'center' },
-  statNum:  { fontSize: 20, fontWeight: '800', color: Colors.white },
+  statNum:  { fontSize: 18, fontWeight: '800', color: Colors.white },
   statLabel:{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginTop: 2 },
   statDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.1)', marginVertical: 4 },
 
@@ -195,8 +212,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     ...Shadows.md,
   },
-  heroTitle: { fontSize: 16, fontWeight: '800', color: Colors.white, marginBottom: 4 },
-  heroSub: { fontSize: 12, color: 'rgba(255,255,255,0.75)', maxWidth: 200 },
+  heroTitle: { fontSize: 16, fontWeight: '800', color: Colors.white, marginBottom: 4, textAlign: 'right' },
+  heroSub: { fontSize: 12, color: 'rgba(255,255,255,0.75)', maxWidth: 200, textAlign: 'right' },
   heroArrow: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
 
   noticeCard: {
@@ -210,10 +227,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.warning + '40',
   },
   noticeIcon: { fontSize: 24 },
-  noticeTitle: { fontSize: 14, fontWeight: '700', color: Colors.warning, marginBottom: 4 },
-  noticeBody: { fontSize: 13, color: Colors.textMuted, lineHeight: 18 },
+  noticeTitle: { fontSize: 14, fontWeight: '700', color: Colors.warning, marginBottom: 4, textAlign: 'right' },
+  noticeBody: { fontSize: 13, color: Colors.textMuted, lineHeight: 18, textAlign: 'right' },
 
-  sectionTitle: { ...Typography.h4, color: Colors.text, marginBottom: Spacing.sm },
+  sectionTitle: { ...Typography.h4, color: Colors.text, marginBottom: Spacing.sm, textAlign: 'right' },
 
   activeJobCard: {
     backgroundColor: Colors.surface,
@@ -225,8 +242,8 @@ const styles = StyleSheet.create({
   },
   activeJobTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
   activeJobPrice: { fontSize: 16, fontWeight: '800', color: Colors.success },
-  activeJobRoute: { fontSize: 17, fontWeight: '700', color: Colors.text, marginBottom: 4 },
-  activeJobLoad: { fontSize: 13, color: Colors.textMuted, marginBottom: Spacing.md },
+  activeJobRoute: { fontSize: 17, fontWeight: '700', color: Colors.text, marginBottom: 4, textAlign: 'right' },
+  activeJobLoad: { fontSize: 13, color: Colors.textMuted, marginBottom: Spacing.md, textAlign: 'right' },
 
   progressTrack: { height: 6, backgroundColor: Colors.border, borderRadius: 3, overflow: 'hidden', marginBottom: Spacing.sm },
   progressFill: { height: '100%', backgroundColor: Colors.orange, borderRadius: 3 },

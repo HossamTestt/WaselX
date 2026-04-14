@@ -4,8 +4,17 @@
  */
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+// ─── API CONFIGURATION ──────────────────────────────────────────
+// 1. FOR EMULATORS: 
+//    Android: http://10.0.2.2:3000/api
+//    iOS: http://localhost:3000/api
+// 2. FOR PHYSICAL DEVICES:
+//    Use your machine's local IP (e.g., http://192.168.1.10:3000/api)
 
-const BASE_URL = 'http://10.131.35.66:3000/api'; // Use local IP for physical device testing
+const BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
+// ⚠️ CHANGE THIS to your machine IP for physical device testing:
+// const BASE_URL = 'http://192.168.1.xxx:3000/api'; 
 
 const api = axios.create({
   baseURL: BASE_URL,

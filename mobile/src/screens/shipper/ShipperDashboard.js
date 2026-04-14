@@ -1,11 +1,11 @@
 /**
  * WaselX — Premium Shipper Dashboard
- * Time-aware greeting · Stats bar · Floating menu · Active shipment timeline
+ * Time-aware greeting · Stats bar · Floating menu · Active shipment timeline (Arabic)
  */
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, RefreshControl,
-  TouchableOpacity, Animated
+  TouchableOpacity, Animated, Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, StatusBadge, Button, EmptyState } from '../../components';
@@ -15,9 +15,9 @@ import { shipmentsAPI } from '../../services/api';
 
 const GREETING = () => {
   const h = new Date().getHours();
-  if (h < 12) return { text: 'Good morning', icon: '☀️' };
-  if (h < 17) return { text: 'Good afternoon', icon: '🌤' };
-  return { text: 'Good evening', icon: '🌙' };
+  if (h < 12) return { text: 'صباح الخير', icon: '☀️' };
+  if (h < 17) return { text: 'مساء الخير', icon: '🌤' };
+  return { text: 'مساء الخير', icon: '🌙' };
 };
 
 const STATUS_STEPS = ['open', 'bidding', 'assigned', 'picked_up', 'in_transit', 'delivered'];
@@ -87,14 +87,23 @@ export default function ShipperDashboard({ navigation }) {
     <View style={styles.root}>
       {/* ── Header ── */}
       <SafeAreaView style={styles.header} edges={['top']}>
+        <View style={styles.headerTop}>
+          <View style={styles.logoBackground}>
+            <Image 
+              source={require('../../../assets/logo_horizontal.png')} 
+              style={styles.logo} 
+              resizeMode="contain" 
+            />
+          </View>
+        </View>
         <View style={styles.headerRow}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.greetSubtitle}>{greeting.text} {greeting.icon}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={styles.greetName}>{user?.name?.split(' ')[0]}</Text>
               {verified && (
                 <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedText}>✓ Certified</Text>
+                  <Text style={styles.verifiedText}>✓ موثق</Text>
                 </View>
               )}
             </View>
@@ -108,17 +117,17 @@ export default function ShipperDashboard({ navigation }) {
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statNum}>{stats.active}</Text>
-            <Text style={styles.statLabel}>Active</Text>
+            <Text style={styles.statLabel}>نشط</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statNum}>{stats.delivered}</Text>
-            <Text style={styles.statLabel}>Delivered</Text>
+            <Text style={styles.statLabel}>تم التوصيل</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statNum}>{shipments.length}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>الإجمالي</Text>
           </View>
         </View>
       </SafeAreaView>
@@ -131,35 +140,35 @@ export default function ShipperDashboard({ navigation }) {
       >
         {/* Hero CTA */}
         <View style={styles.heroBanner}>
-          <View>
-            <Text style={styles.heroTitle}>Need to move something?</Text>
-            <Text style={styles.heroSubtitle}>Get bids from certified carriers in minutes</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.heroTitle}>تريد شحن شيء ما؟</Text>
+            <Text style={styles.heroSubtitle}>احصل على عروض من ناقلين معتمدين في دقائق</Text>
           </View>
           <TouchableOpacity
             style={styles.heroBtn}
             onPress={() => navigation.navigate('Create')}
             activeOpacity={0.85}
           >
-            <Text style={styles.heroBtnText}>＋  New</Text>
+            <Text style={styles.heroBtnText}>＋  جديد</Text>
           </TouchableOpacity>
         </View>
 
         {/* Shipments list */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Your Shipments</Text>
+          <Text style={styles.sectionTitle}>شحناتك</Text>
           <TouchableOpacity onPress={() => navigation.navigate('History')}>
-            <Text style={styles.seeAll}>View all →</Text>
+            <Text style={styles.seeAll}>عرض الكل ←</Text>
           </TouchableOpacity>
         </View>
 
         {shipments.length === 0 ? (
           <EmptyState
             icon="📦"
-            title="No shipments yet"
-            message="Create your first shipment and watch bids roll in."
+            title="لا توجد شحنات بعد"
+            message="أنشئ شحنتك الأولى وشاهد العروض تصلك."
             action={
               <Button
-                title="Create Shipment"
+                title="إنشاء شحنة"
                 onPress={() => navigation.navigate('Create')}
                 style={{ marginTop: 16, paddingHorizontal: 32 }}
               />
@@ -172,7 +181,7 @@ export default function ShipperDashboard({ navigation }) {
                 {/* Top row */}
                 <View style={styles.shipTop}>
                   <StatusBadge status={s.status} />
-                  <Text style={styles.shipDate}>{new Date(s.created_at).toLocaleDateString('en-AE', { day: '2-digit', month: 'short' })}</Text>
+                  <Text style={styles.shipDate}>{new Date(s.created_at).toLocaleDateString('ar-AE', { day: '2-digit', month: 'short' })}</Text>
                 </View>
 
                 {/* Route */}
@@ -193,12 +202,12 @@ export default function ShipperDashboard({ navigation }) {
 
                 {/* Footer */}
                 <View style={styles.shipFooter}>
-                  <Text style={styles.loadType}>{s.load_type} · {s.weight_tonnes}t</Text>
+                  <Text style={styles.loadType}>{s.load_type} · {s.weight_tonnes} طن</Text>
                   {s.final_price ? (
-                    <Text style={styles.priceTag}>AED {Number(s.final_price).toLocaleString()}</Text>
+                    <Text style={styles.priceTag}>{Number(s.final_price).toLocaleString()} AED</Text>
                   ) : (
                     <View style={styles.bidsBadge}>
-                      <Text style={styles.bidsText}>{s.bid_count || 0} Bids</Text>
+                      <Text style={styles.bidsText}>{s.bid_count || 0} عروض</Text>
                     </View>
                   )}
                 </View>
@@ -219,9 +228,17 @@ const styles = StyleSheet.create({
 
   // Header
   header: { backgroundColor: Colors.navy, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: Spacing.sm },
-  greetSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: '600', marginBottom: 2 },
-  greetName: { fontSize: 24, fontWeight: '800', color: Colors.white },
+  headerTop: { alignItems: 'center', paddingTop: Spacing.xs, marginBottom: -Spacing.xs },
+  logoBackground: { 
+    backgroundColor: 'rgba(255,255,255,0.92)', 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    borderRadius: 12,
+  },
+  logo: { width: 100, height: 28 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: Spacing.xs },
+  greetSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: '600', marginBottom: 2, textAlign: 'right' },
+  greetName: { fontSize: 24, fontWeight: '800', color: Colors.white, textAlign: 'right' },
   logoutBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
 
   verifiedBadge: { backgroundColor: Colors.success + '30', paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.full, borderWidth: 1, borderColor: Colors.success + '50' },
@@ -246,14 +263,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     ...Shadows.md,
   },
-  heroTitle: { fontSize: 16, fontWeight: '800', color: Colors.white, marginBottom: 4 },
-  heroSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', maxWidth: 160 },
+  heroTitle: { fontSize: 16, fontWeight: '800', color: Colors.white, marginBottom: 4, textAlign: 'right' },
+  heroSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', maxWidth: 160, textAlign: 'right' },
   heroBtn: { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: BorderRadius.xl, paddingHorizontal: 16, paddingVertical: 10 },
   heroBtnText: { color: Colors.white, fontWeight: '800', fontSize: 14 },
 
   // Section
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
-  sectionTitle: { ...Typography.h4, color: Colors.text },
+  sectionTitle: { ...Typography.h4, color: Colors.text, textAlign: 'right' },
   seeAll: { fontSize: 13, color: Colors.blue, fontWeight: '700' },
 
   // Shipment card
@@ -271,12 +288,12 @@ const styles = StyleSheet.create({
 
   routeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   routePin: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 6 },
-  routeCity: { fontSize: 14, fontWeight: '700', color: Colors.text, flex: 1 },
+  routeCity: { fontSize: 14, fontWeight: '700', color: Colors.text, flex: 1, textAlign: 'right' },
   routeArrow: { paddingHorizontal: 8 },
   routeArrowText: { color: Colors.textLight, fontSize: 12 },
 
   shipFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: Spacing.sm, borderTopWidth: 1, borderTopColor: Colors.border },
-  loadType: { fontSize: 12, color: Colors.textMuted, fontWeight: '600' },
+  loadType: { fontSize: 12, color: Colors.textMuted, fontWeight: '600', textAlign: 'right' },
   priceTag: { fontSize: 14, fontWeight: '800', color: Colors.success },
   bidsBadge: { backgroundColor: Colors.warningBg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.full },
   bidsText: { fontSize: 12, fontWeight: '700', color: Colors.warning },

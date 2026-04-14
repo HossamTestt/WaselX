@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
 const { sequelize } = require('../../config/database');
 const { QueryTypes } = require('sequelize');
+const { sendPushNotification } = require('../../services/notificationService');
 
 /**
  * POST /api/shipments
@@ -240,6 +241,22 @@ exports.updateStatus = async (req, res, next) => {
     );
 
     res.json({ success: true, message: `Shipment status updated to '${status}'` });
+
+    // Notify Shipper
+    const statusMessages = {
+      picked_up: 'Pack your bags! Your shipment has been picked up. 🚛',
+      in_transit: 'On the way! Your shipment is now in transit. 🛣️',
+      delivered: 'Arrived! Your shipment has been successfully delivered. ✅',
+    };
+
+    if (statusMessages[status]) {
+      sendPushNotification(
+        shipment.shipper_id,
+        'Shipment Update 📦',
+        statusMessages[status],
+        { type: 'status_update', shipmentId: id, status }
+      );
+    }
   } catch (error) {
     next(error);
   }

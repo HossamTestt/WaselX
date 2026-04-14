@@ -3,6 +3,7 @@
  */
 const { sequelize } = require('../../config/database');
 const { QueryTypes } = require('sequelize');
+const { sendPushNotification } = require('../../services/notificationService');
 
 exports.listUsers = async (req, res, next) => {
   try {
@@ -54,6 +55,23 @@ exports.updateUserStatus = async (req, res, next) => {
     await sequelize.query('UPDATE users SET status = :status WHERE id = :id',
       { replacements: { status, id: req.params.id }, type: QueryTypes.UPDATE });
     res.json({ success: true, message: `User status updated to '${status}'` });
+
+    // Notify User
+    if (status === 'active') {
+      sendPushNotification(
+        req.params.id,
+        'Welcome to WaselX! 🚀',
+        'Your account has been approved. You can now start using the platform.',
+        { type: 'account_approved' }
+      );
+    } else if (status === 'suspended') {
+      sendPushNotification(
+        req.params.id,
+        'Account Suspended ⚠️',
+        'Your account has been suspended. Please contact support for more information.',
+        { type: 'account_suspended' }
+      );
+    }
   } catch (e) { next(e); }
 };
 
@@ -103,5 +121,22 @@ exports.updateVerificationStatus = async (req, res, next) => {
     }
 
     res.json({ success: true, message: 'Verification status updated' });
+
+    // Notify User
+    if (verification_status === 'verified') {
+      sendPushNotification(
+        req.params.id,
+        'Identity Verified! ✅',
+        'Your documents have been verified. You are now a trusted partner.',
+        { type: 'verification_success' }
+      );
+    } else if (verification_status === 'rejected') {
+      sendPushNotification(
+        req.params.id,
+        'Verification Update 📋',
+        'Your identification documents were not accepted. Please re-upload clear copies.',
+        { type: 'verification_rejected' }
+      );
+    }
   } catch (e) { next(e); }
 };

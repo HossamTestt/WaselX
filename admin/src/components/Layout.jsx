@@ -7,15 +7,16 @@ import {
   Percent, LogOut, Truck, ShoppingBag
 } from 'lucide-react';
 import logo from '../assets/logo.png';
+import { t } from '../translations.js';
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Overview', end: true },
-  { to: '/users', icon: Users, label: 'Users' },
-  { to: '/marketplace', icon: ShoppingBag, label: 'Marketplace' },
-  { to: '/shipments', icon: Package, label: 'Shipments' },
-  { to: '/bids', icon: Gavel, label: 'Bids' },
-  { to: '/analytics', icon: BarChart2, label: 'Analytics' },
-  { to: '/commission', icon: Percent, label: 'Commission' },
+  { to: '/', icon: LayoutDashboard, label: t('overview'), end: true },
+  { to: '/users', icon: Users, label: t('users') },
+  { to: '/marketplace', icon: ShoppingBag, label: t('marketplace') },
+  { to: '/shipments', icon: Package, label: t('shipments') },
+  { to: '/bids', icon: Gavel, label: t('bids') },
+  { to: '/analytics', icon: BarChart2, label: t('analytics') },
+  { to: '/commission', icon: Percent, label: t('commission') },
 ];
 
 export default function Layout() {
@@ -31,8 +32,8 @@ export default function Layout() {
       {/* ─── Sidebar ─────────────────────────── */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img src={logo} alt="WaselX" style={{ height: '45px', marginBottom: '8px' }} />
-          <div className="sidebar-subtitle">Admin Dashboard</div>
+          <img src={logo} alt="WaselX" style={{ height: '40px', marginBottom: '8px' }} />
+          <div className="sidebar-subtitle">{t('adminDashboard')}</div>
         </div>
 
         <nav className="sidebar-nav">
@@ -52,10 +53,10 @@ export default function Layout() {
 
         <div className="sidebar-footer">
           <div className="sidebar-user">
-            <div className="sidebar-avatar">A</div>
+            <div className="sidebar-avatar">م</div>
             <div className="sidebar-user-info">
-              <div className="name">WaselX Admin</div>
-              <div className="role">Super Admin</div>
+              <div className="name">مسؤول واصل إكس</div>
+              <div className="role">{t('superAdmin')}</div>
             </div>
             <button onClick={handleLogout} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>
               <LogOut size={16} />

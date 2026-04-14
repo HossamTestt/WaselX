@@ -9,12 +9,13 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#142F48"
+      "backgroundColor": "#FFFFFF"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.waselx.logistics",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "WaselX uses your location to show nearby shipments and track deliveries.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "WaselX uses your background location for real-time shipment tracking."
@@ -23,9 +24,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#142F48"
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.waselx.logistics",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Users, Package, Truck, DollarSign, Clock, CheckCircle, Activity, Box, Gavel, UserPlus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { adminAPI } from '../services/api.js';
+import { t } from '../translations.js';
 
 const PIE_COLORS = ['#007BFC', '#FF7917', '#10b981', '#f59e0b', '#ef4444', '#6366f1'];
 
@@ -42,8 +43,8 @@ export default function OverviewPage() {
     <div>
       <div className="topbar">
         <div>
-          <div className="topbar-title">Overview</div>
-          <div className="topbar-subtitle">Platform KPIs at a Glance</div>
+          <div className="topbar-title">{t('overview')}</div>
+          <div className="topbar-subtitle">{t('platformSummary')}</div>
         </div>
         <div className="topbar-actions">
           <span style={{ fontSize: '13px', color: '#64748b' }}>
@@ -55,15 +56,15 @@ export default function OverviewPage() {
       <div className="page-content">
         {/* ─── KPI Cards ─────────────────────── */}
         <div className="kpi-grid">
-          <KpiCard icon={<Users size={22} />} iconClass="blue" label="Total Shippers" value={kpis.total_shippers || 0} />
-          <KpiCard icon={<Truck size={22} />} iconClass="orange" label="Total Carriers" value={kpis.total_carriers || 0} sub={`${kpis.pending_carriers || 0} pending approval`} subClass="warning" />
-          <KpiCard icon={<Package size={22} />} iconClass="navy" label="Total Shipments" value={kpis.total_shipments || 0} />
-          <KpiCard icon={<Clock size={22} />} iconClass="blue" label="Active Shipments" value={kpis.active_shipments || 0} />
-          <KpiCard icon={<CheckCircle size={22} />} iconClass="green" label="Delivered" value={kpis.delivered_shipments || 0} />
+          <KpiCard icon={<Users size={22} />} iconClass="blue" label={t('totalShippers')} value={kpis.total_shippers || 0} />
+          <KpiCard icon={<Truck size={22} />} iconClass="orange" label={t('totalCarriers')} value={kpis.total_carriers || 0} sub={`${kpis.pending_carriers || 0} ${t('pendingCarriers')}`} subClass="warning" />
+          <KpiCard icon={<Package size={22} />} iconClass="navy" label={t('totalShipments')} value={kpis.total_shipments || 0} />
+          <KpiCard icon={<Clock size={22} />} iconClass="blue" label={t('activeShipments')} value={kpis.active_shipments || 0} />
+          <KpiCard icon={<CheckCircle size={22} />} iconClass="green" label={t('deliveredShipments')} value={kpis.delivered_shipments || 0} />
           <KpiCard
             icon={<DollarSign size={22} />}
             iconClass="orange"
-            label="Total Revenue"
+            label={t('totalRevenue')}
             value={`AED ${(parseFloat(kpis.total_revenue) || 0).toLocaleString('en-AE', { minimumFractionDigits: 0 })}`}
           />
         </div>
@@ -114,15 +115,15 @@ export default function OverviewPage() {
           <div className="card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={18} color="#FF7917" />
-              <div className="card-title">Live Platform Activity</div>
+              <div className="card-title">{t('liveActivity')}</div>
             </div>
-            <div className="badge badge-orange badge-dot">Live</div>
+            <div className="badge badge-orange badge-dot">مباشر</div>
           </div>
           <div className="card-body" style={{ padding: '0' }}>
             <div className="activity-feed">
               {activity.length === 0 ? (
                 <div className="empty-state" style={{ padding: '32px' }}>
-                  <p>No recent activity detected.</p>
+                  <p>{t('noActivity')}</p>
                 </div>
               ) : (
                 activity.map((item, idx) => (
@@ -136,7 +137,7 @@ export default function OverviewPage() {
                     <ActivityIcon type={item.type} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '14px', fontWeight: '600' }}>{item.title}</div>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>by {item.user_name}</div>
+                      <div style={{ fontSize: '12px', color: '#64748b' }}>{t('by')} {item.user_name}</div>
                     </div>
                     <div style={{ fontSize: '11px', color: '#94a3b8' }}>
                       {new Date(item.timestamp).toLocaleTimeString('en-AE', { hour: '2-digit', minute: '2-digit' })}

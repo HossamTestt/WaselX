@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
 const { sequelize } = require('../../config/database');
 const { QueryTypes } = require('sequelize');
+const { sendPushNotification } = require('../../services/notificationService');
 
 /**
  * POST /api/bids
@@ -75,6 +76,14 @@ exports.submitBid = async (req, res, next) => {
       message: 'Bid submitted successfully',
       data: bid,
     });
+
+    // Notify Shipper
+    sendPushNotification(
+      shipment.shipper_id,
+      'New Bid Received! 📦',
+      `A carrier has submitted a bid of AED ${price} for your shipment from ${shipment.pickup_city || 'your location'}.`,
+      { type: 'new_bid', shipmentId: shipment_id, bidId }
+    );
   } catch (error) {
     next(error);
   }
@@ -213,6 +222,14 @@ exports.acceptBid = async (req, res, next) => {
       message: 'Bid accepted. Carrier has been assigned.',
       data: { bidId: id, carrierId: bid.carrier_id, finalPrice: bid.price, commissionAmount },
     });
+
+    // Notify Carrier
+    sendPushNotification(
+      bid.carrier_id,
+      'Bid Accepted! 🎉',
+      `Your bid of AED ${bid.price} has been accepted. View details to start the job.`,
+      { type: 'bid_accepted', shipmentId: bid.shipment_id, bidId: id }
+    );
   } catch (error) {
     next(error);
   }
@@ -241,6 +258,14 @@ exports.rejectBid = async (req, res, next) => {
     );
 
     res.json({ success: true, message: 'Bid rejected' });
+
+    // Notify Carrier
+    sendPushNotification(
+      bid.carrier_id,
+      'Bid Update 📋',
+      'The shipper has rejected your bid for the shipment.',
+      { type: 'bid_rejected', shipmentId: bid.shipment_id, bidId: id }
+    );
   } catch (error) {
     next(error);
   }
